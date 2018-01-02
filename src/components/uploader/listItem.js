@@ -1,6 +1,9 @@
 import React, {Component} from 'react';
 
 export default class ListItem extends Component {
+	shouldComponentUpdate() {
+		return false;
+	}
 
 	render() {
 		return (
@@ -8,7 +11,7 @@ export default class ListItem extends Component {
 				<span>{this.props.children}</span>
 				<div className="options">
 					<a
-                        href="#" 
+                        href="#"
                         className="remove"
                         onClick={this.props.onRemove.bind(null, this.props.preview)}>
                     </a>
@@ -16,5 +19,4 @@ export default class ListItem extends Component {
 			</div>
 		);
 	}
-
 }

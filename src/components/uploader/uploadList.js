@@ -3,8 +3,9 @@ import Dropzone from 'react-dropzone'
 import ListItem from './listItem';
 
 export default class UploadList extends Component {
-	constructor() {
-		super();
+	constructor(props) {
+		super(props);
+
 		this.state = {
 			uploadFiles: []
 		};
@@ -16,6 +17,8 @@ export default class UploadList extends Component {
 		});
 		this.setState({
 			uploadFiles: newFiles
+		}, () => {
+			this.props.fileUpload(this.state.uploadFiles);
 		});
 	}
 
@@ -23,9 +26,14 @@ export default class UploadList extends Component {
 		const files = [...this.state.uploadFiles, ...acceptedFiles];
 		this.setState({
 			uploadFiles: files
+		}, () => {
+			this.props.fileUpload(this.state.uploadFiles);
 		});
 	}
 
+	shouldComponentUpdate(nextProps, nextState) {
+		return this.state.uploadFiles.length !== nextState.uploadFiles.length;
+	}
 
 	render() {
 		const _handleRemove = this.handleRemove.bind(this);
@@ -36,10 +44,10 @@ export default class UploadList extends Component {
 					<p>or click here</p>
 				</Dropzone>
 				{
-					this.state.uploadFiles.map((file, index) => {
+					this.state.uploadFiles.map((file) => {
 						return (
 							<ListItem
-								key={index}
+								key={file.preview}
 								preview={file.preview}
 								onRemove={_handleRemove}>
 								{file.name}

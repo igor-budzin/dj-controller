@@ -168,6 +168,10 @@ h1, h2 {
     &:hover {
         background-color: darken($green, 5%);
     }
+    &.disable {
+        background-color: #878787;
+        cursor: default;
+    }
 }
 
 .main-music-controller {
