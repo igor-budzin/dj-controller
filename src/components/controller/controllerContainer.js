@@ -6,9 +6,9 @@ export default class ControllerContainer extends Component {
 	render() {
 		return (
 			<div>
-				<MusicController />
+				<MusicController side="left" />
 				<MainMusicController />
-				<MusicController />
+				<MusicController side="right" />
 			</div>
 		);
 	}

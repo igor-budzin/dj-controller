@@ -19,7 +19,7 @@ export default class MusicController extends Component {
 
 	render() {
 		return (
-			<div className="music-controller">
+			<div className={"music-controller " + this.props.side}>
 				<div className="title">
 					<span>The Killers - Somebody told me</span>
 					<TimeMarker
