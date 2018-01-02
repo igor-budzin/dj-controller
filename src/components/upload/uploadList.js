@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import Dropzone from 'react-dropzone'
 import ListItem from './listItem';
 
-export default class UploadContainer extends Component {
+export default class UploadList extends Component {
 	constructor() {
 		super();
 		this.state = {
@@ -26,6 +26,7 @@ export default class UploadContainer extends Component {
 		});
 	}
 
+
 	render() {
 		const _handleRemove = this.handleRemove.bind(this);
 		return (
@@ -35,15 +36,16 @@ export default class UploadContainer extends Component {
 					<p>or click here</p>
 				</Dropzone>
 				{
-				  this.state.uploadFiles.map((file, index) => {
-					  return (
-						  <ListItem
-						  		key={index}
+					this.state.uploadFiles.map((file, index) => {
+						return (
+							<ListItem
+								key={index}
 								preview={file.preview}
 								onRemove={_handleRemove}>
 								{file.name}
-						  </ListItem>)
-				  })
+							</ListItem>
+						)
+					})
 				}
 			</div>
 		);
