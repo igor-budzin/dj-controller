@@ -1,20 +1,50 @@
 import React, {Component} from 'react';
 import {PlaybackControls, VolumeSlider, MuteToggleButton, ProgressBar, TimeMarker} from 'react-player-controls';
+import Howler from 'howler';
 
 export default class MusicController extends Component {
-	constructor() {
-		super();
+	constructor(props) {
+		super(props);
+
 		this.state = {
 			isPlayable: true,
-			isPlaying: true,
+			isPlaying: false,
 			hasPrevious: false,
 			hasNext: true,
 			isVolume: true,
 			volume: 0.8,
 			isMuted: false,
 			totalTime: 260,
-			currentTime: 140
+			currentTime: 140,
+			playList: []
 		};
+
+		this.audioController = null;
+	}
+
+	handlePlay() {
+		if(this.state.isPlaying) {
+			this.audioController.pause();
+			this.setState({isPlaying: false});
+		}
+		else {
+			const reader = new FileReader();
+			reader.onload = () => {
+				this.audioController = new Howl({
+					src: [reader.result]
+				});
+				this.audioController.play();
+				console.log('3333');
+			}
+			reader.readAsDataURL(this.state.playList[0]);
+			this.setState({isPlaying: true});
+		}
+	}
+
+	componentDidMount() {
+		this.setState({
+			playList: this.props.playList
+		});
 	}
 
 	render() {
@@ -58,7 +88,7 @@ export default class MusicController extends Component {
 					hasPrevious={this.state.hasPrevious}
 					showNext={true}
 					hasNext={this.state.hasNext}
-					onPlaybackChange={isPlaying => this.setState({ ...this.state, isPlaying })}
+					onPlaybackChange={this.handlePlay.bind(this)}
 					onPrevious={() => alert('Go to previous')}
 					onNext={() => alert('Go to next')}
 				/>

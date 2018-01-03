@@ -3,12 +3,24 @@ import MainMusicController from './mainMusicController';
 import MusicController from './musicController';
 
 export default class ControllerContainer extends Component {
+	constructor(props) {
+		super(props);
+
+		this.state = {
+
+		};
+	}
+
+	componentDidMount() {
+
+	}
+
 	render() {
 		return (
 			<div>
-				<MusicController side="left" />
+				<MusicController side="left" playList={this.props.leftAudioFiles} />
 				<MainMusicController />
-				<MusicController side="right" />
+				<MusicController side="right" playList={this.props.rightAudioFiles} />
 			</div>
 		);
 	}

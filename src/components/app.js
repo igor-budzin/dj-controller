@@ -16,6 +16,9 @@ export default class App extends Component {
 	}
 
 	render() {
+		const left = this.state.leftAudioFiles.length;
+		const right = this.state.rightAudioFiles.length;
+
 		return (
 			<div className="app">
                 <Switch>
@@ -29,10 +32,17 @@ export default class App extends Component {
 					/>
                     <Route
 						path='/dj-controller'
-						render={() =>
-							<ControllerContainer
-								
-							/>}
+						render={() => {
+							if(left && right) {
+								return (
+									<ControllerContainer
+										leftAudioFiles={this.state.leftAudioFiles}
+										rightAudioFiles={this.state.rightAudioFiles}
+									/>
+								);
+							}
+							else return (<Redirect to="/upload" />);
+						}}
 					/>
 					<Route path='/' exact={true} render={() => <Redirect to="/upload" />} />
 					<Route path='*' exact={true} component={NotFoundContainer} />

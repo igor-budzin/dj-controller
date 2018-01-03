@@ -11,18 +11,6 @@ export default class UploadContainer extends Component {
 			leftFileArray: [],
 			rightFileArray: []
 		};
-
-		// this.state.leftFileArray.forEach((file) => {
-		// 	const reader = new FileReader();
-		// 	reader.onload = () => {
-		// 		var sound = new Howl({
-		// 		  src: [reader.result]
-		// 		});
-		// 		sound.play();
-		// 		console.log('3333');
-		// 	}
-		// 	reader.readAsDataURL(file);
-		// });
 	}
 
 	handleStart(files) {
