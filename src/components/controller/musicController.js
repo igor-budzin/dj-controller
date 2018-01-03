@@ -23,27 +23,41 @@ export default class MusicController extends Component {
 	}
 
 	handlePlay() {
+		console.log(this.audioController);
 		if(this.state.isPlaying) {
 			this.audioController.pause();
 			this.setState({isPlaying: false});
 		}
 		else {
-			const reader = new FileReader();
-			reader.onload = () => {
-				this.audioController = new Howl({
-					src: [reader.result]
-				});
-				this.audioController.play();
-				console.log('3333');
-			}
-			reader.readAsDataURL(this.state.playList[0]);
+			this.audioController.play(this.audioController);
 			this.setState({isPlaying: true});
 		}
+	}
+
+	handleNext() {
+		console.log("ds");
+		// this.audioController.stop();
+		// this.audioController.next(1);
 	}
 
 	componentDidMount() {
 		this.setState({
 			playList: this.props.playList
+		}, () => {
+			let tempArr = [];
+			this.state.playList.forEach((file, index) => {
+				const reader = new FileReader();
+				reader.onload = () => {
+					tempArr.push(reader.result);
+					this.audioController = new Howl({
+						src: tempArr
+					});
+					console.log(tempArr);
+				}
+				reader.readAsDataURL(this.state.playList[index]);
+			})
+
+
 		});
 	}
 
@@ -90,7 +104,7 @@ export default class MusicController extends Component {
 					hasNext={this.state.hasNext}
 					onPlaybackChange={this.handlePlay.bind(this)}
 					onPrevious={() => alert('Go to previous')}
-					onNext={() => alert('Go to next')}
+					onNext={this.handleNext.bind(this)}
 				/>
 			</div>
 		);
