@@ -10,55 +10,93 @@ export default class MusicController extends Component {
 			isPlayable: true,
 			isPlaying: false,
 			hasPrevious: false,
-			hasNext: true,
+			hasNext: false,
 			isVolume: true,
 			volume: 0.8,
 			isMuted: false,
 			totalTime: 260,
 			currentTime: 140,
-			playList: []
+			playListBuffer: [],
+			currentIndex: 0
 		};
 
 		this.audioController = null;
 	}
 
-	handlePlay() {
-		console.log(this.audioController);
-		if(this.state.isPlaying) {
-			this.audioController.pause();
-			this.setState({isPlaying: false});
+	playSong() {
+		this.setState({isPlaying: true});
+		if(this.audioController === null) {
+			this.audioController = new Howl({
+				src: [this.state.playListBuffer[this.state.currentIndex]]
+			});
 		}
-		else {
-			this.audioController.play(this.audioController);
+		this.audioController.play();
+	}
+
+	pauseSong() {
+		this.setState({isPlaying: false});
+		this.audioController.pause();
+	}
+
+	stopSong() {
+		this.setState({isPlaying: false});
+		this.audioController.stop();
+	}
+
+	nextSong() {
+		this.setState({currentIndex: this.state.currentIndex + 1}, () => {
+			this.audioController = new Howl({
+				src: [this.state.playListBuffer[this.state.currentIndex]]
+			});
 			this.setState({isPlaying: true});
-		}
+			this.audioController.play();
+
+			if(this.props.playList.length - 1 === this.state.currentIndex) {
+				this.setState({hasNext: false});
+			}
+		});
+	}
+
+	prevSong() {
+
+	}
+
+	handlePlayPause() {
+		if(this.state.isPlaying) this.pauseSong();
+		else this.playSong();
 	}
 
 	handleNext() {
-		console.log("ds");
-		// this.audioController.stop();
-		// this.audioController.next(1);
+		this.stopSong();
+		this.nextSong();
+	}
+
+	componentDidUpdate() {
+		if(this.audioController !== null) {
+			this.audioController.on('end', () => {
+				this.stopSong();
+				if(this.props.playList.length - 1 !== this.state.currentIndex) {
+					this.nextSong();
+				}
+			});
+		}
 	}
 
 	componentDidMount() {
-		this.setState({
-			playList: this.props.playList
-		}, () => {
-			let tempArr = [];
-			this.state.playList.forEach((file, index) => {
-				const reader = new FileReader();
-				reader.onload = () => {
-					tempArr.push(reader.result);
-					this.audioController = new Howl({
-						src: tempArr
-					});
-					console.log(tempArr);
-				}
-				reader.readAsDataURL(this.state.playList[index]);
-			})
+		const _this = this;
 
-
+		this.props.playList.forEach((file, index) => {
+			const reader = new FileReader();
+			reader.onload = () => {
+				_this.setState({playListBuffer: [...this.state.playListBuffer, reader.result]});
+				console.log(this.state.playListBuffer);
+			}
+			reader.readAsDataURL(this.props.playList[index]);
 		});
+
+		if(this.props.playList.length > 1) {
+			this.setState({hasNext: true});
+		}
 	}
 
 	render() {
@@ -102,7 +140,7 @@ export default class MusicController extends Component {
 					hasPrevious={this.state.hasPrevious}
 					showNext={true}
 					hasNext={this.state.hasNext}
-					onPlaybackChange={this.handlePlay.bind(this)}
+					onPlaybackChange={this.handlePlayPause.bind(this)}
 					onPrevious={() => alert('Go to previous')}
 					onNext={this.handleNext.bind(this)}
 				/>
