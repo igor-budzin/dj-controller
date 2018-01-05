@@ -1,5 +1,6 @@
 @import "_vars";
 @import "_controls";
+@import "_range";
 
 @font-face {
     font-family: "Flaticon";
@@ -232,6 +233,14 @@ h1, h2 {
         position: relative;
         height: 24px;
         line-height: 24px;
+        & > span {
+            width: 330px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            display: block;
+        }
         .TimeMarker {
             position: absolute;
             right: 0;
@@ -239,6 +248,22 @@ h1, h2 {
             font-size: 12px;
             height: 16px;
             line-height: 16px;
+        }
+    }
+    .upload-list {
+        width: 409px;
+        margin-top: 20px;
+        .item {
+            cursor: pointer;
+            &:nth-child(odd) {
+                background-color: lighten($green, 30%);
+            }
+            &:nth-child(even) {
+                background-color: #fff;
+            }
+            &:hover {
+                background-color: lighten($green, 27%);
+            }
         }
     }
 }

@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import {PlaybackControls, VolumeSlider, MuteToggleButton, ProgressBar, TimeMarker} from 'react-player-controls';
-
+import Slider from 'react-rangeslider';
+import UploadList from './uploadList';
 
 export default class MusicController extends Component {
 	constructor(props) {
@@ -18,7 +19,8 @@ export default class MusicController extends Component {
 			totalTime: 0,
 			currentTime: 0,
 			playListBuffer: [],
-			currentIndex: 0
+			currentIndex: 0,
+			rate: 1.0
 		};
 
 		this.timer = null;
@@ -38,36 +40,48 @@ export default class MusicController extends Component {
 		this.setState({isMuted: isMuted, isVolume: !isMuted});
 	}
 
+	handleRate(value) {
+		this.setState({rate: parseFloat(value.toFixed(2), 10)}, () => {
+			this.audioController.rate(value);
+		})
+	}
+
 	firstInit() {
 		this.audioController = new Howl({
 			src: [this.state.playListBuffer[this.state.currentIndex].audioData]
 		});
 
-		this.setState({
-			totalTime: Math.floor(this.audioController.duration()),
-			songName: this.state.playListBuffer[this.state.currentIndex].name,
-			hasNext: this.state.currentIndex !== this.props.playList.length - 1 ? true : false
-		});
-
-	}
-
-	playSong() {
-		this.setState({isPlaying: true});
-		this.audioController = new Howl({
-			src: [this.state.playListBuffer[this.state.currentIndex].audioData]
-		});
-		this.audioController.play();
-		this.audioController.once('load', () => {
+		this.audioController.on('load', () => {
 			this.setState({
 				totalTime: Math.floor(this.audioController.duration()),
 				songName: this.state.playListBuffer[this.state.currentIndex].name,
-				hasNext: this.state.currentIndex !== this.props.playList.length - 1 ? true : false,
-				hasPrevious: (this.state.currentIndex - 1) >= 0 ? true : false
+				hasNext: this.state.currentIndex !== this.props.playList.length - 1 ? true : false
 			});
 		});
+	}
+
+	playSong() {
+		this.setState({isPlaying: true, isPaused: false});
+		this.audioController = new Howl({
+			src: [this.state.playListBuffer[this.state.currentIndex].audioData],
+			onload: () => {
+				this.setState({
+					totalTime: Math.round(this.audioController.duration()),
+					songName: this.state.playListBuffer[this.state.currentIndex].name,
+					hasNext: this.state.currentIndex !== this.props.playList.length - 1 ? true : false,
+					hasPrevious: this.state.currentIndex !== 0 ? true : false
+				});
+			}
+		});
+		this.audioController.seek(this.state.currentTime);
+
+		this.audioController.play();
+		this.audioController.rate(this.state.rate);
+		this.audioController.on('end', this.handleEnd.bind(this));
+
 		this.timer = setInterval(() => {
 			if(this.audioController.playing()) {
-				this.setState({currentTime:  Math.floor(this.audioController.seek())});
+				this.setState({currentTime:  Math.round(this.audioController.seek())});
 			}
 		}, 1000);
 	}
@@ -78,15 +92,6 @@ export default class MusicController extends Component {
 		clearInterval(this.timer);
 	}
 
-	stopSong() {
-		this.setState({isPlaying: false});
-		this.audioController.stop();
-		this.audioController = new Howl({
-			src: [this.state.playListBuffer[this.state.currentIndex]]
-		});
-		this.audioController.play();
-	}
-
 	handlePlayPause() {
 		if(this.state.isPlaying) this.pauseSong();
 		else this.playSong();
@@ -94,16 +99,33 @@ export default class MusicController extends Component {
 
 	handlePrevBtn() {
 		this.audioController.stop();
-		this.setState({currentIndex: this.state.currentIndex - 1}, () => {
+		this.setState({
+			currentIndex: this.state.currentIndex - 1,
+			currentTime: 0
+		}, () => {
 			this.playSong();
 		});
 	}
-	
+
 	handleNextBtn() {
 		this.audioController.stop();
-		this.setState({currentIndex: this.state.currentIndex + 1}, () => {
+		this.setState({
+			currentIndex: this.state.currentIndex + 1,
+			currentTime: 0
+		}, () => {
 			this.playSong();
 		});
+	}
+
+	handleEnd() {
+		if(this.props.playList.length !== this.state.currentIndex + 1) {
+			this.setState({
+				currentIndex: this.state.currentIndex + 1,
+				currentTime: 0
+			}, () => {
+				this.playSong();
+			});
+		}
 	}
 
 	componentWillMount() {
@@ -134,50 +156,65 @@ export default class MusicController extends Component {
 	render() {
 		return (
 			<div className={"music-controller " + this.props.side}>
-				<div className="title">
-					<span>{this.state.songName}</span>
-					<TimeMarker
+				<div>
+					<div className="title">
+						<span>{this.state.songName}</span>
+						<TimeMarker
+							totalTime={this.state.totalTime}
+							currentTime={this.state.currentTime}
+							markerSeparator={' / '}
+							firstMarkerType={this.state.firstMarkerType}
+							secondMarkerType={this.state.secondMarkerType}
+						/>
+					</div>
+					<ProgressBar
 						totalTime={this.state.totalTime}
 						currentTime={this.state.currentTime}
-						markerSeparator={' / '}
-						firstMarkerType={this.state.firstMarkerType}
-						secondMarkerType={this.state.secondMarkerType}
+						isSeekable={true}
+						onSeek={time => this.setState({ currentTime: time }, () => {
+							this.audioController.seek(this.state.currentTime)
+						})}
+						onSeekStart={time => this.setState({ lastSeekStart: time })}
+						onSeekEnd={time => this.setState({ lastSeekEnd: time })}
+						onIntent={time => this.setState({ lastIntent: time })}
+					/>
+					<div className="slider">
+						<Slider
+							min={0.5}
+							max={4.0}
+							step={0.05}
+							value={this.state.rate}
+							onChange={this.handleRate.bind(this)}
+						/>
+					</div>
+					<div className="volume-bar">
+						<MuteToggleButton
+							isEnabled={true}
+							isMuted={this.state.isMuted}
+							onMuteChange={this.handleMute.bind(this)}
+						/>
+						<VolumeSlider
+							isEnabled={this.state.isVolume}
+							volume={this.state.volume}
+							onVolumeChange={this.handleVolume.bind(this)}
+						/>
+					</div>
+					<PlaybackControls
+						isPlayable={this.state.isPlayable}
+						isPlaying={this.state.isPlaying}
+						showPrevious={true}
+						hasPrevious={this.state.hasPrevious}
+						showNext={true}
+						hasNext={this.state.hasNext}
+						onPlaybackChange={this.handlePlayPause.bind(this)}
+						onPrevious={this.handlePrevBtn.bind(this)}
+						onNext={this.handleNextBtn.bind(this)}
 					/>
 				</div>
-				<ProgressBar
-					totalTime={this.state.totalTime}
-					currentTime={this.state.currentTime}
-					isSeekable={true}
-					onSeek={time => this.setState({ currentTime: time }, () => {
-						this.audioController.seek(this.state.currentTime)
-					})}
-					onSeekStart={time => this.setState({ lastSeekStart: time })}
-					onSeekEnd={time => this.setState({ lastSeekEnd: time })}
-					onIntent={time => this.setState({ lastIntent: time })}
-				/>
-				<div className="volume-bar">
-					<MuteToggleButton
-						isEnabled={true}
-						isMuted={this.state.isMuted}
-						onMuteChange={this.handleMute.bind(this)}
-					/>
-					<VolumeSlider
-						isEnabled={this.state.isVolume}
-						volume={this.state.volume}
-						onVolumeChange={this.handleVolume.bind(this)}
-					/>
-				</div>
-				<PlaybackControls
-					isPlayable={this.state.isPlayable}
-					isPlaying={this.state.isPlaying}
-					showPrevious={true}
-					hasPrevious={this.state.hasPrevious}
-					showNext={true}
-					hasNext={this.state.hasNext}
-					onPlaybackChange={this.handlePlayPause.bind(this)}
-					onPrevious={this.handlePrevBtn.bind(this)}
-					onNext={this.handleNextBtn.bind(this)}
-				/>
+				{
+					this.state.playListBuffer.length === this.props.playList.length ?
+					<UploadList files={this.state.playListBuffer} /> : ''
+				}
 			</div>
 		);
 	}
