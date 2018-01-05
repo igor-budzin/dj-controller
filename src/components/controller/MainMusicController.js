@@ -29,8 +29,16 @@ export default class MainMusicController extends Component {
 			<div className="main-music-controller">
 				{
 					this.state.isPlaying ?
-					<PauseButton onClick={() => this.setState({isPlaying: false})} /> :
-					<PlayButton isEnabled={true} onClick={() => this.setState({isPlaying: true})} />
+					<PauseButton onClick={() => {
+						this.setState({isPlaying: false});
+						this.props.leftAudioController.pause();
+						this.props.rightAudioController.pause();
+					}} /> :
+					<PlayButton isEnabled={true} onClick={() => {
+						this.setState({isPlaying: true});
+						this.props.leftAudioController.play();
+						this.props.rightAudioController.play();
+					}} />
 				}
 				<VolumeSlider
 					isEnabled={this.state.isVolume}

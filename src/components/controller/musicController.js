@@ -20,7 +20,8 @@ export default class MusicController extends Component {
 			currentTime: 0,
 			playListBuffer: [],
 			currentIndex: 0,
-			rate: 1.0
+			rate: 1.0,
+			loader: true
 		};
 
 		this.timer = null;
@@ -48,14 +49,19 @@ export default class MusicController extends Component {
 
 	firstInit() {
 		this.audioController = new Howl({
-			src: [this.state.playListBuffer[this.state.currentIndex].audioData]
+			src: [this.state.playListBuffer[this.state.currentIndex].audioData],
+			html5: true,
+			format: ['mp3']
 		});
+
+		this.props.audioController(this.audioController);
 
 		this.audioController.on('load', () => {
 			this.setState({
 				totalTime: Math.floor(this.audioController.duration()),
 				songName: this.state.playListBuffer[this.state.currentIndex].name,
-				hasNext: this.state.currentIndex !== this.props.playList.length - 1 ? true : false
+				hasNext: this.state.currentIndex !== this.props.playList.length - 1 ? true : false,
+				loader: false
 			});
 		});
 	}
@@ -64,24 +70,31 @@ export default class MusicController extends Component {
 		this.setState({isPlaying: true, isPaused: false});
 		this.audioController = new Howl({
 			src: [this.state.playListBuffer[this.state.currentIndex].audioData],
-			onload: () => {
-				this.setState({
-					totalTime: Math.round(this.audioController.duration()),
-					songName: this.state.playListBuffer[this.state.currentIndex].name,
-					hasNext: this.state.currentIndex !== this.props.playList.length - 1 ? true : false,
-					hasPrevious: this.state.currentIndex !== 0 ? true : false
-				});
-			}
+			html5: true,
+			format: ['mp3']
 		});
-		this.audioController.seek(this.state.currentTime);
+		this.props.audioController(this.audioController);
+		this.audioController.on('load', () => {
+			this.setState({
+				totalTime: Math.round(this.audioController.duration()),
+				songName: this.state.playListBuffer[this.state.currentIndex].name,
+				hasNext: this.state.currentIndex !== this.props.playList.length - 1 ? true : false,
+				hasPrevious: this.state.currentIndex !== 0 ? true : false,
+				loader: false
+			});
+		});
 
-		this.audioController.play();
+		this.audioController.seek(this.state.currentTime);
 		this.audioController.rate(this.state.rate);
+		this.audioController.play();
 		this.audioController.on('end', this.handleEnd.bind(this));
 
 		this.timer = setInterval(() => {
 			if(this.audioController.playing()) {
-				this.setState({currentTime:  Math.round(this.audioController.seek())});
+				this.setState({
+					currentTime:  Math.round(this.audioController.seek()),
+					loader: false
+				});
 			}
 		}, 1000);
 	}
@@ -101,7 +114,8 @@ export default class MusicController extends Component {
 		this.audioController.stop();
 		this.setState({
 			currentIndex: this.state.currentIndex - 1,
-			currentTime: 0
+			currentTime: 0,
+			loader: true
 		}, () => {
 			this.playSong();
 		});
@@ -111,7 +125,19 @@ export default class MusicController extends Component {
 		this.audioController.stop();
 		this.setState({
 			currentIndex: this.state.currentIndex + 1,
-			currentTime: 0
+			currentTime: 0,
+			loader: true
+		}, () => {
+			this.playSong();
+		});
+	}
+
+	pickSong(index) {
+		this.audioController.stop();
+		this.setState({
+			currentIndex: index,
+			currentTime: 0,
+			loader: true
 		}, () => {
 			this.playSong();
 		});
@@ -121,7 +147,8 @@ export default class MusicController extends Component {
 		if(this.props.playList.length !== this.state.currentIndex + 1) {
 			this.setState({
 				currentIndex: this.state.currentIndex + 1,
-				currentTime: 0
+				currentTime: 0,
+				loader: true
 			}, () => {
 				this.playSong();
 			});
@@ -132,24 +159,17 @@ export default class MusicController extends Component {
 		const _this = this;
 
 		this.props.playList.forEach((file, index) => {
-			const reader = new FileReader();
-			reader.onload = () => {
-				let bufferItem = {
-					name: file.name.slice(0, -4),
-					audioData: reader.result
-				};
-				setTimeout(() => {
-					_this.setState({playListBuffer: [...this.state.playListBuffer, bufferItem]}, () => {
-						this.audioController = new Howl({
-							src: [this.state.playListBuffer[this.state.currentIndex].audioData]
-						});
-						if(this.state.playListBuffer.length === this.props.playList.length) {
-							this.firstInit();
-						}
-					});
-				}, 0);
-			}
-			reader.readAsDataURL(this.props.playList[index]);
+			let bufferItem = {
+				name: file.name.slice(0, -4),
+				audioData: file.preview
+			};
+			setTimeout(() => {
+				_this.setState({playListBuffer: [...this.state.playListBuffer, bufferItem]}, () => {
+					if(this.state.playListBuffer.length === this.props.playList.length) {
+						this.firstInit();
+					}
+				});
+			}, 0);
 		});
 	}
 
@@ -213,8 +233,19 @@ export default class MusicController extends Component {
 				</div>
 				{
 					this.state.playListBuffer.length === this.props.playList.length ?
-					<UploadList files={this.state.playListBuffer} /> : ''
+					<UploadList pickSong={this.pickSong.bind(this)} files={this.state.playListBuffer} /> : ''
 				}
+				<div className={"loader-wrap" + (this.state.loader ? '' : ' none')}>
+					<div className="loading-dots">
+						<div className="loading-dots__dot"></div>
+						<div className="loading-dots__dot"></div>
+						<div className="loading-dots__dot"></div>
+						<div className="loading-dots__dot"></div>
+						<div className="loading-dots__dot"></div>
+						<div className="loading-dots__dot"></div>
+						<div className="loading-dots__dot"></div>
+					</div>
+				</div>
 			</div>
 		);
 	}

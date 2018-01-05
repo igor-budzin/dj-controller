@@ -7,7 +7,7 @@ export default class ListItem extends Component {
 
 	render() {
 		return (
-            <div className="item">
+            <div className="item" onClick={this.props.pickSong.bind(null, this.props.id)}>
 				<span>{this.props.children}</span>
 			</div>
 		);

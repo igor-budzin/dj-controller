@@ -1,6 +1,7 @@
 @import "_vars";
 @import "_controls";
 @import "_range";
+@import "_loader";
 
 @font-face {
     font-family: "Flaticon";
@@ -197,6 +198,7 @@ h1, h2 {
     width: 409px;
     float: left;
     margin-right: 20px;
+    position: relative;
     &:last-child {
         margin-right: 0;
     }

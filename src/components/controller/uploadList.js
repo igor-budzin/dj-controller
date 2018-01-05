@@ -10,14 +10,13 @@ export default class UploadList extends Component {
 		};
 	}
 
-
 	render() {
 		return (
 			<div className="upload-list">
 				{
 					this.props.files.map((file, index) => {
 						return (
-							<ListItem id={index} key={file.name}>{file.name}</ListItem>
+							<ListItem pickSong={this.props.pickSong} id={index} key={file.name + index}>{file.name}</ListItem>
 						)
 					})
 				}
