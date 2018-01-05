@@ -223,6 +223,9 @@ h1, h2 {
         .PlaybackControls {
             float: right;
         }
+        .stop-button {
+            float: right;
+        }
     }
     .volume-bar {
         display: inline-block;
@@ -265,6 +268,40 @@ h1, h2 {
             }
             &:hover {
                 background-color: lighten($green, 27%);
+            }
+        }
+    }
+    .stop-button {
+        height: 50px;
+        width: 50px;
+        border: 2px solid $green;
+        border-radius: 25px;
+        display: block;
+        position: relative;
+        float: left;
+        margin-right: 10px;
+        cursor: pointer;
+        &:after {
+            display: block;
+            content: "";
+            width: 20px;
+            height: 20px;
+            background-color: $green;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translateX(-50%) translateY(-50%);
+        }
+        &:hover {
+            border-color: $color-hover;
+            &:after {
+                background-color: $color-hover;
+            }
+        }
+        &:active {
+            border-color: $color-active;
+            &:after {
+                background-color: $color-active;
             }
         }
     }

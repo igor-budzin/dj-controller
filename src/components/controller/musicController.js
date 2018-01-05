@@ -105,6 +105,15 @@ export default class MusicController extends Component {
 		clearInterval(this.timer);
 	}
 
+	handleStop() {
+		this.setState({
+			isPlaying: false,
+			currentTime: 0
+		});
+		this.audioController.stop();
+		clearInterval(this.timer);
+	}
+
 	handlePlayPause() {
 		if(this.state.isPlaying) this.pauseSong();
 		else this.playSong();
@@ -219,17 +228,20 @@ export default class MusicController extends Component {
 							onVolumeChange={this.handleVolume.bind(this)}
 						/>
 					</div>
-					<PlaybackControls
-						isPlayable={this.state.isPlayable}
-						isPlaying={this.state.isPlaying}
-						showPrevious={true}
-						hasPrevious={this.state.hasPrevious}
-						showNext={true}
-						hasNext={this.state.hasNext}
-						onPlaybackChange={this.handlePlayPause.bind(this)}
-						onPrevious={this.handlePrevBtn.bind(this)}
-						onNext={this.handleNextBtn.bind(this)}
-					/>
+					<div className="play-controls-wrap">
+						<PlaybackControls
+							isPlayable={this.state.isPlayable}
+							isPlaying={this.state.isPlaying}
+							showPrevious={true}
+							hasPrevious={this.state.hasPrevious}
+							showNext={true}
+							hasNext={this.state.hasNext}
+							onPlaybackChange={this.handlePlayPause.bind(this)}
+							onPrevious={this.handlePrevBtn.bind(this)}
+							onNext={this.handleNextBtn.bind(this)}
+						/>
+					</div>
+					<div className="stop-button" onClick={this.handleStop.bind(this)}></div>
 				</div>
 				{
 					this.state.playListBuffer.length === this.props.playList.length ?
