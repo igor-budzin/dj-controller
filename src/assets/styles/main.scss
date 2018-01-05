@@ -269,6 +269,12 @@ h1, h2 {
             &:hover {
                 background-color: lighten($green, 27%);
             }
+            &.current {
+                background-color: lighten($green, 5%);
+                span {
+                    color: #fff;
+                }
+            }
         }
     }
     .stop-button {

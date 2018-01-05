@@ -245,7 +245,7 @@ export default class MusicController extends Component {
 				</div>
 				{
 					this.state.playListBuffer.length === this.props.playList.length ?
-					<UploadList pickSong={this.pickSong.bind(this)} files={this.state.playListBuffer} /> : ''
+					<UploadList pickSong={this.pickSong.bind(this)} currentIndex={this.state.currentIndex} files={this.state.playListBuffer} /> : ''
 				}
 				<div className={"loader-wrap" + (this.state.loader ? '' : ' none')}>
 					<div className="loading-dots">

@@ -16,7 +16,12 @@ export default class UploadList extends Component {
 				{
 					this.props.files.map((file, index) => {
 						return (
-							<ListItem pickSong={this.props.pickSong} id={index} key={file.name + index}>{file.name}</ListItem>
+							<ListItem
+								pickSong={this.props.pickSong}
+								currentClass={this.props.currentIndex === index ? 'current' : ''}
+								id={index} key={file.name + index}>
+								{file.name}
+							</ListItem>
 						)
 					})
 				}
