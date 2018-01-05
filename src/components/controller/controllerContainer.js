@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import MainMusicController from './mainMusicController';
 import MusicController from './musicController';
+import Howler from 'howler';
 
 export default class ControllerContainer extends Component {
 	constructor(props) {
